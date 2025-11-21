@@ -55,10 +55,9 @@ The model is based on the EfficientViT-M2 architecture, fine-tuned on a publicly
 ## Project Structure
 Smart-Kidney/
 │
-├── backend/
-│   ├── app.py
-│   ├── requirements.txt
-│ ── best_model/
+├── .vscode
+│   
+├─ best_model/
 │       └── efficientvit_m2_kidney_disease_classifier.pth
 │
 ├── frontend/
@@ -66,30 +65,26 @@ Smart-Kidney/
 │   ├── components/
 │   ├── public/
 │   ├── styles/
-│   ├── package.json
-│   └── tailwind.config.ts
+│   └─── package.json
 │
-└── README.md
+├── .gitignore
+│
+├── README.md
+│
+├── app.py
+│
+└── requirements.txt
 
 # How to run Backend?
-### STEPS:
-
-Clone the repository
-
-```bash
-git clone https://github.com/Prriyanshu9898/Kidney-Disease-Classification-Using-Deep-Learning.git
-```
 ### STEP 01- Create a Python environment after opening the repository
-
 ```bash
-cd Kidney-Disease-Classification-Using-Deep-Learning
+cd Smart-Kidney-AI-Powered-CT-Scan-Classification-System
 python -m venv env
 ```
 
 ```bash
-env\Scripts\activate
+venv\Scripts\activate
 ```
-
 
 ### STEP 02- install the requirements
 ```bash
@@ -98,10 +93,6 @@ pip install -r requirements.txt
 ### STEP 03- Run the Flask Backend
 ```bash
 python app.py
-```
-### STEP 04- Run the Training Pipeline
-```bash
-python main.py
 ```
 
 # How to run Frontend?
