@@ -8,11 +8,18 @@ from io import BytesIO
 import base64
 
 app = Flask(__name__)
+
+# Allow only your frontend domain
 CORS(app, resources={
-    r"/*": {"origins": ["https://smart-kidney-frontend.vercel.app"]}
+    r"/*": {"origins": ["https://smart-kidney-frontend.vercel.app", "http://localhost:3000"]}
 })
 
-def load_model(model_name, num_classes, device):
+# -----------------------
+# LOAD MODEL ONLY ONCE 🚀
+# -----------------------
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+def load_model(model_name, num_classes):
     model = timm.create_model(model_name, pretrained=False, num_classes=num_classes)
     model_path = 'best_model/efficientvit_m2_kidney_disease_classifier.pth'
     model.load_state_dict(torch.load(model_path, map_location=device))
@@ -20,6 +27,12 @@ def load_model(model_name, num_classes, device):
     model.eval()
     return model
 
+# Load once at startup (FAST PREDICTION)
+model = load_model('efficientvit_m2', 4)
+
+# -----------------------
+# IMAGE PREPROCESSING
+# -----------------------
 def preprocess_image(image):
     transform = transforms.Compose([
         transforms.Resize(256),
@@ -34,20 +47,21 @@ def preprocess_image(image):
 def index():
     return "<h1>Kidney Disease Detector Backend</h1>"
 
+# -----------------------
+# PREDICT API
+# -----------------------
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
         data = request.get_json()
         base64_str = data['image']
 
-        # Remove data:image/jpeg;base64, part if it exists
+        # Remove prefix "data:image/jpeg..." if present
         if "," in base64_str:
             base64_str = base64_str.split(",")[1]
 
         image = Image.open(BytesIO(base64.b64decode(base64_str))).convert('RGB')
 
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        model = load_model('efficientvit_m2', 4, device)
         tensor = preprocess_image(image).to(device)
 
         with torch.no_grad():
@@ -58,9 +72,14 @@ def predict():
         result = labels[pred.item()]
 
         return jsonify({'prediction': result})
+
     except Exception as e:
         print("🔥 Error:", e)
         return jsonify({'error': str(e)}), 500
 
+# -----------------------
+# LOCAL DEV MODE
+# -----------------------
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
+
