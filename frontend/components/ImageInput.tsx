@@ -36,7 +36,7 @@ const ImageInput: FC = () => {
       setLoading(true);
       const base64Image = await convertToBase64(image);
       const cleanBase64Data = base64Image.replace(/^data:image\/[a-z]+;base64,/,"");
-      const response = await axios.post("http://127.0.0.1:5000/predict", {
+      const response = await axios.post("https://smart-kidney-backend.onrender.com/predict", {
         image: cleanBase64Data,
       });
 
