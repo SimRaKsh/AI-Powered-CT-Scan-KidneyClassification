@@ -8,7 +8,9 @@ from io import BytesIO
 import base64
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={
+    r"/*": {"origins": ["https://smart-kidney-frontend.vercel.app"]}
+})
 
 def load_model(model_name, num_classes, device):
     model = timm.create_model(model_name, pretrained=False, num_classes=num_classes)
