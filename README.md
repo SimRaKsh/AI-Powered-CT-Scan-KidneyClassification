@@ -9,8 +9,8 @@ The system combines a Next.js + TailwindCSS frontend with a Flask + PyTorch back
 
 This project demonstrates full-stack development, model integration, image preprocessing, REST API design, and deployment using modern web technologies.
 
-### Frontend URL: https://kidney-disease-classification.vercel.app/
-### Backend URL: 
+### Frontend URL: https://smart-kidney-frontend.vercel.app/
+### Backend URL: https://smart-kidney-backend.onrender.com/
 - (Model Notebooks can be found in Research Folder)
 - (Model Results can be found in Results Folder)
 
@@ -58,7 +58,7 @@ Smart-Kidney/
 ├── backend/
 │   ├── app.py
 │   ├── requirements.txt
-│   └── best_model/
+│ ── best_model/
 │       └── efficientvit_m2_kidney_disease_classifier.pth
 │
 ├── frontend/
