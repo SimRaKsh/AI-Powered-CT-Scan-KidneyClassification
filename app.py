@@ -9,14 +9,10 @@ import base64
 
 app = Flask(__name__)
 
-# Allow only your frontend domain
-CORS(app, resources={
-    r"/*": {"origins": ["https://smart-kidney-frontend.vercel.app", "http://localhost:3000"]}
-})
+# For now, allow all origins so CORS stops blocking
+CORS(app)  # <- simplest working version
 
-# -----------------------
-# LOAD MODEL ONLY ONCE 🚀
-# -----------------------
+# -------- Global device + model (loaded once) --------
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def load_model(model_name, num_classes):
@@ -27,12 +23,9 @@ def load_model(model_name, num_classes):
     model.eval()
     return model
 
-# Load once at startup (FAST PREDICTION)
 model = load_model('efficientvit_m2', 4)
 
-# -----------------------
-# IMAGE PREPROCESSING
-# -----------------------
+# -------- Preprocessing --------
 def preprocess_image(image):
     transform = transforms.Compose([
         transforms.Resize(256),
@@ -43,43 +36,34 @@ def preprocess_image(image):
     ])
     return transform(image).unsqueeze(0)
 
-@app.route('/')
+@app.route("/")
 def index():
     return "<h1>Kidney Disease Detector Backend</h1>"
 
-# -----------------------
-# PREDICT API
-# -----------------------
-@app.route('/predict', methods=['POST'])
+@app.route("/predict", methods=["POST"])
 def predict():
     try:
         data = request.get_json()
-        base64_str = data['image']
+        base64_str = data["image"]
 
-        # Remove prefix "data:image/jpeg..." if present
+        # strip "data:image/..;base64," if present
         if "," in base64_str:
             base64_str = base64_str.split(",")[1]
 
-        image = Image.open(BytesIO(base64.b64decode(base64_str))).convert('RGB')
-
+        image = Image.open(BytesIO(base64.b64decode(base64_str))).convert("RGB")
         tensor = preprocess_image(image).to(device)
 
         with torch.no_grad():
             outputs = model(tensor)
             _, pred = torch.max(outputs, 1)
 
-        labels = ['Cyst', 'Tumor', 'Stone', 'Normal']
-        result = labels[pred.item()]
-
-        return jsonify({'prediction': result})
-
+        labels = ["Cyst", "Tumor", "Stone", "Normal"]
+        return jsonify({"prediction": labels[pred.item()]})
     except Exception as e:
         print("🔥 Error:", e)
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"error": str(e)}), 500
 
-# -----------------------
-# LOCAL DEV MODE
-# -----------------------
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
+
 
